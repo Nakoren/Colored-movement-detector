@@ -13,7 +13,7 @@ required_contour_area = 100
 spawnrate = 60
 hard_mode = True
 
-hue_range = 15
+hue_range = 30
 saturation_range = 80
 value_range = 80
 
@@ -63,6 +63,7 @@ def start():
                 color_frame[i][j] = controller_color
         color_frame = cv2.cvtColor(color_frame, cv2.COLOR_HSV2BGR)
         cv2.imshow('ControllerColor', color_frame)
+        print(controller_color)
 
         while True:
             prev_frame = new_frame.copy()
@@ -84,13 +85,11 @@ def start():
             for contr in contours:
                 area = cv2.contourArea(contr)
                 if (area > required_contour_area):
-                    '''
-                    circle_controller.check_frame(contours)
                     cv2.imshow('Moving', thres_frame)
                     cv2.imshow('Color', color_mask)
+            circle_controller.check_frame(contours)
 
-                cv2.imshow('ColorAndMoving', color_thres)
-                '''
+            cv2.imshow('ColorAndMoving', color_thres)
 
             for circle in circle_controller.circleList:
                 cv2.circle(display_frame, (circle.centerX, circle.centerY), circle.radius, circle.color, thickness=-1)
@@ -99,10 +98,11 @@ def start():
             cv2.putText(display_frame, f"Lost: {circle_controller.lost}", (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                         (0, 0, 255), 2)
 
+            '''
             cv2.imshow('Source', frame)
             '''
             cv2.imshow('Window', display_frame)
-            '''
+
             if cv2.waitKey(1) & 0xFF == 27:
                 break
             circle_controller.start_next_iteration()
@@ -129,10 +129,15 @@ def get_average_color_from_region(src_frame, gauss_frame):
 
 
 def get_color_in_point(src_frame, gauss_frame):
-    hsv_frame = cv2.cvtColor(src_frame, cv2.COLOR_BGR2HSV_FULL)
+    hsv_frame = cv2.cvtColor(src_frame, cv2.COLOR_BGR2HSV)
     color_box_region = cv2.selectROI('FirstFrame', src_frame)
+    cropped = hsv_frame[color_box_region[1]:color_box_region[1] + color_box_region[3], color_box_region[0]:color_box_region[0] + color_box_region[2]]
+
+    '''
     controller_hsv_color = hsv_frame[
         color_box_region[1] + color_box_region[3] // 2, color_box_region[0] + color_box_region[2] // 2]
+    '''
+    controller_hsv_color = cropped[cropped.shape[0]//2, cropped.shape[1]//2]
 
     return controller_hsv_color
 
@@ -148,7 +153,7 @@ def threshold_mask_to_color(frame, color):
     high_color[1] = min(int(high_color[1]) + saturation_range, 255)
     high_color[2] = min(int(high_color[2]) + value_range, 255)
 
-    if (color[1]>220) or (color[2]>220):
+    if (color[1]>200) or (color[2]>200):
         down_color[0] = 0
         high_color[0] = 255
 

@@ -65,8 +65,10 @@ class CircleController:
                 continue
             for contour in contours:
                 area = cv2.contourArea(contour)
+                '''
                 if area < self.reqContourArea:
                     continue
+                '''
                 dist = cv2.pointPolygonTest(contour, (circle.centerX, circle.centerY), True)
                 if dist + circle.radius > 0:
                     self.score += 1
