@@ -25,10 +25,12 @@ def start():
     cv2.namedWindow('Window', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('Window', w, h)
 
-    cv2.namedWindow('Source', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('Source', w, h)
     cv2.namedWindow('FirstFrame', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('FirstFrame', w, h)
+
+    '''
+    cv2.namedWindow('Source', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('Source', w, h)
     cv2.namedWindow('ControllerColor', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('ControllerColor', 200, 50)
     cv2.namedWindow('Moving', cv2.WINDOW_NORMAL)
@@ -37,6 +39,7 @@ def start():
     cv2.resizeWindow('ColorAndMoving', w, h)
     cv2.namedWindow('Color', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('Color', w, h)
+    '''
 
     fps = int(video.get(cv2.CAP_PROP_FPS))
     # fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -81,11 +84,13 @@ def start():
             for contr in contours:
                 area = cv2.contourArea(contr)
                 if (area > required_contour_area):
+                    '''
                     circle_controller.check_frame(contours)
                     cv2.imshow('Moving', thres_frame)
                     cv2.imshow('Color', color_mask)
 
                 cv2.imshow('ColorAndMoving', color_thres)
+                '''
 
             for circle in circle_controller.circleList:
                 cv2.circle(display_frame, (circle.centerX, circle.centerY), circle.radius, circle.color, thickness=-1)
@@ -95,7 +100,9 @@ def start():
                         (0, 0, 255), 2)
 
             cv2.imshow('Source', frame)
+            '''
             cv2.imshow('Window', display_frame)
+            '''
             if cv2.waitKey(1) & 0xFF == 27:
                 break
             circle_controller.start_next_iteration()
@@ -140,6 +147,10 @@ def threshold_mask_to_color(frame, color):
     high_color[0] = min(int(high_color[0]) + hue_range, 255)
     high_color[1] = min(int(high_color[1]) + saturation_range, 255)
     high_color[2] = min(int(high_color[2]) + value_range, 255)
+
+    if (color[1]>220) or (color[2]>220):
+        down_color[0] = 0
+        high_color[0] = 255
 
     mask = cv2.inRange(hsv_frame, down_color, high_color)
     return mask
